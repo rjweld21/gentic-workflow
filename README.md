@@ -96,21 +96,39 @@ cp <gentic-workflow-path>/config/project-config.example.json .workflow/project-c
 echo ".workflow/" >> .gitignore
 ```
 
-### 5. (Optional) Configure skill frameworks
+### 5. Install skills
+
+Symlink the included skills into your agent's skill directory:
+
+```bash
+# Linux/macOS:
+mkdir -p ~/.claude/skills
+ln -s ~/.claude/workflow/skills/initialize-workflow ~/.claude/skills/initialize-workflow
+ln -s ~/.claude/workflow/skills/using-workflow ~/.claude/skills/using-workflow
+
+# Windows:
+mkdir "%USERPROFILE%\.claude\skills" 2>nul
+mklink /J "%USERPROFILE%\.claude\skills\initialize-workflow" "%USERPROFILE%\.claude\workflow\skills\initialize-workflow"
+mklink /J "%USERPROFILE%\.claude\skills\using-workflow" "%USERPROFILE%\.claude\workflow\skills\using-workflow"
+```
+
+### 6. (Optional) Configure skill frameworks
 
 If you use Superpowers, OpenSpec, or another skill framework, configure the `skills` section of your `project-config.json`. See [`docs/skill-integration.md`](docs/skill-integration.md).
 
-### 6. Start the orchestrator
+### 7. Start using the workflow
 
-Spawn the orchestrator as a long-lived agent. Point it at the workflow root:
+In any new Claude Code session, the workflow skills are now available:
 
+- **`/initialize-workflow`** — interactive setup wizard (run once per environment or project)
+- **`/using-workflow`** — session initializer that loads board context and determines your role
+
+Or start the orchestrator manually:
 ```
 Read and follow: <gentic-workflow-root>/agents/board-orchestrator.md
 Board config: <gentic-workflow-root>/config/board-config.json
 Adapter commands: <gentic-workflow-root>/adapters/<adapter>/commands.md
 ```
-
-The orchestrator will poll the board and dispatch workers automatically.
 
 ## Directory Structure
 
@@ -137,6 +155,11 @@ gentic-workflow/
 │   ├── board-config.example.json      ← Template for your board's field IDs
 │   ├── project-config.example.json    ← Template for per-repo config
 │   └── orchestrator-state.example.json ← Template for orchestrator runtime state
+├── skills/
+│   ├── initialize-workflow/
+│   │   └── SKILL.md                   ← Setup wizard for first-time configuration
+│   └── using-workflow/
+│       └── SKILL.md                   ← Session initializer — loads context for orchestration
 └── docs/
     ├── adapter-interface.md           ← Abstract operations all adapters must implement
     ├── agent-runtime.md               ← Runtime requirements + Claude Code reference
