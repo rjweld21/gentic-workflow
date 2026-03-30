@@ -20,13 +20,21 @@ Interactive setup wizard that walks you through configuring the Gentic Workflow 
 - Workflow is already set up and you want to start working — use `using-workflow` instead
 - You just need to update a single config value — edit the file directly
 
+## Prerequisites
+
+If you can see this skill, either the bootstrap script already ran or someone manually installed the skills. The bootstrap script (`scripts/bootstrap.sh` or `scripts/bootstrap.ps1`) handles cloning the repo, creating the `~/.claude/workflow/` symlink, and installing skills. If those steps are already done, this wizard picks up from board/project configuration.
+
+If the bootstrap has NOT been run and someone is reading this skill manually, direct them to run:
+- **Linux/macOS:** `curl -sL https://raw.githubusercontent.com/rjweld21/gentic-workflow/master/scripts/bootstrap.sh | bash`
+- **Windows:** `irm https://raw.githubusercontent.com/rjweld21/gentic-workflow/master/scripts/bootstrap.ps1 | iex`
+
 ## Setup Flow
 
 Walk the user through each step below. Check what's already done and skip completed steps.
 
 ### Step 1: Locate the Gentic Workflow Installation
 
-Check if the workflow is already installed:
+Check if the workflow is already installed (bootstrap should have done this):
 
 1. Check for `~/.claude/workflow/` (symlink or directory)
 2. If not found, ask the user where they cloned the gentic-workflow repo
