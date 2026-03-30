@@ -1,0 +1,25 @@
+# Board config with real IDs (use board-config.example.json as template)
+config/board-config.json
+
+# Runtime state (generated per-machine by the orchestrator)
+**/orchestrator-state.json
+
+# Agent working files (generated during workflow execution)
+**/agent-notes/
+**/evidence/
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+.vscode/
+.idea/

@@ -1,0 +1,59 @@
+{
+  "_comment": "Per-project configuration. Copy to <your-repo>/.workflow/project-config.json and fill in values.",
+  "_instructions": {
+    "repo": "Repository in owner/name format. Used for PRs/MRs, work item linking, and code checkout.",
+    "default_branch": "Branch that PRs/MRs target and agents branch from. Usually 'main' or 'master'.",
+    "board_project_option_id": "The option ID for this project in the board's 'Project' field. See your adapter's README for how to retrieve this.",
+    "project_instructions_file": "The file in the repo root that contains project-specific instructions for agents. Common values: CLAUDE.md, .cursorrules, CONTRIBUTING.md, AGENTS.md.",
+    "notes_directory": "Directory inside the repo for agent notes, evidence, and orchestrator state. Must be gitignored.",
+    "spec_directory": "Where design specs are stored. Default: docs/specs",
+    "plan_directory": "Where implementation plans are stored. Default: docs/plans",
+    "branch_prefix_pattern": "Pattern for feature branch names. Use <story-name> as placeholder. Default: feat/<story-name>",
+    "methodology": "Development methodology agents follow. Options: tdd (default, RED-GREEN-REFACTOR), bdd, test-after. TDD is strongly recommended.",
+    "test_commands": "Commands each agent runs to verify tests pass. Keyed by area (backend, frontend, etc).",
+    "coverage_thresholds": "Minimum coverage percentage per area. Agents fail if below threshold.",
+    "coding_standards": "Project-specific standards agents must follow.",
+    "skills": "Optional. Workflow-enhancing skills agents can use. See docs/skill-integration.md for details."
+  },
+
+  "repo": "owner/repo-name",
+  "default_branch": "main",
+  "board_project_option_id": "",
+
+  "project_instructions_file": "CLAUDE.md",
+  "notes_directory": ".workflow",
+  "spec_directory": "docs/specs",
+  "plan_directory": "docs/plans",
+  "branch_prefix_pattern": "feat/<story-name>",
+  "methodology": "tdd",
+
+  "test_commands": {
+    "backend": "",
+    "frontend": "",
+    "infrastructure": "",
+    "e2e": ""
+  },
+
+  "coverage_thresholds": {
+    "backend": 80,
+    "frontend": 80,
+    "infrastructure": 80
+  },
+
+  "coding_standards": {
+    "backend_language": "",
+    "frontend_framework": "",
+    "linter": "",
+    "formatter": "",
+    "type_checker": "",
+    "reference": "See project_instructions_file for full details"
+  },
+
+  "skills": {
+    "_comment": "Optional skills that agents can use during their phase. See docs/skill-integration.md for available frameworks and examples.",
+    "refinement": [],
+    "implementation": [],
+    "testing": [],
+    "review": []
+  }
+}

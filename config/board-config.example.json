@@ -1,0 +1,53 @@
+{
+  "_comment": "Copy this to board-config.json and fill in your board's IDs. See adapters/<your-adapter>/README.md for setup instructions. The structure below is for GitHub Projects — other adapters may have different platform-specific fields.",
+
+  "adapter": "github-projects",
+
+  "_platform_specific_comment": "Fields below this line are specific to the github-projects adapter. Other adapters (e.g., linear, jira) will have their own platform-specific fields. See the adapter README for the required config shape.",
+  "owner": "your-github-username",
+  "project_number": 1,
+  "project_id": "PVT_xxx",
+  "issue_repo": "your-username/backlog",
+  "issue_repo_id": "R_xxx",
+
+  "fields": {
+    "_comment": "These core fields are required by all adapters. The id/options format may vary by platform.",
+    "status": {
+      "id": "PVTSSF_xxx",
+      "options": {
+        "backlog": "xxx",
+        "refinement": "xxx",
+        "ready": "xxx",
+        "in_progress": "xxx",
+        "testing": "xxx",
+        "in_review": "xxx",
+        "done": "xxx"
+      }
+    },
+    "agent_status": {
+      "id": "PVTSSF_xxx",
+      "options": {
+        "idle": "xxx",
+        "agent_working": "xxx",
+        "blocked": "xxx"
+      }
+    },
+    "priority": {
+      "id": "PVTSSF_xxx",
+      "options": {
+        "p0": "xxx",
+        "p1": "xxx",
+        "p2": "xxx"
+      }
+    },
+    "size": {
+      "id": "PVTSSF_xxx"
+    },
+    "epic": {
+      "id": "PVTSSF_xxx"
+    },
+    "project": {
+      "id": "PVTSSF_xxx"
+    }
+  }
+}
