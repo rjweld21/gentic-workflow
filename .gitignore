@@ -1,10 +1,36 @@
-# Board config with real IDs (use board-config.example.json as template)
+# ============================================================
+# Context Layers — gitignored in the base open-source repo.
+#
+# When forking for an organization:
+#   1. REMOVE the context/org/ line below to commit org-wide config
+#   2. Optionally REMOVE context/project/ to share project configs across the team
+#   3. NEVER remove context/user/ — it contains credentials and personal data
+#
+# See docs/context-layers.md for full details.
+# ============================================================
+
+# Layer 1: Organization context (remove this line in org forks)
+context/org/*
+!context/org/.gitkeep
+!context/org/*.example.*
+
+# Layer 2: Project context (remove this line in org/team forks)
+context/project/*
+!context/project/.gitkeep
+!context/project/*.example.*
+
+# Layer 3: User context (ALWAYS gitignored — never remove this)
+context/user/*
+!context/user/.gitkeep
+!context/user/*.example.*
+
+# Legacy config location (kept for backwards compatibility during migration)
 config/board-config.json
 
 # Runtime state (generated per-machine by the orchestrator)
 **/orchestrator-state.json
 
-# Agent working files (generated during workflow execution)
+# Agent working files (generated during workflow execution in project repos)
 **/agent-notes/
 **/evidence/
 

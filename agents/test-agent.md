@@ -190,6 +190,10 @@ Include a network summary table alongside screenshots:
 **Console errors:** None (or list any CORS/network errors)
 ```
 
+## Context Recording
+
+During testing, you may learn about environment setup requirements, flaky test patterns, or infrastructure specifics. Follow `protocols/context-recording.md` — these are typically project-level learnings. If you discover something about the user's machine (tool version, local path issue), record it at the user level.
+
 ## Pushing Back to In Progress
 
 When any AC fails, push the story back with a detailed comment:

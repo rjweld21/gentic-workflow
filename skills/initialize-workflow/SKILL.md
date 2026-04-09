@@ -7,13 +7,14 @@ description: Use when setting up the Gentic Workflow for the first time, configu
 
 ## Overview
 
-Interactive setup wizard that walks you through configuring the Gentic Workflow — board adapter, board config, project config, directory structure, and symlinks. Run once per environment, then use `using-workflow` for each session.
+Interactive setup wizard that walks you through configuring the Gentic Workflow's three context layers — organization, project, and user. Run once per environment, then use `using-workflow` for each session.
 
 ## When to Use
 
 - First time setting up Gentic Workflow on a machine
-- Adding a new project repo to the workflow
+- Adding a new project to the workflow
 - Configuring a new board adapter (GitHub Projects, Linear, etc.)
+- Setting up org-level context for a forked instance
 - Re-initializing after a broken or stale config
 
 **Do NOT use when:**
@@ -22,115 +23,145 @@ Interactive setup wizard that walks you through configuring the Gentic Workflow 
 
 ## Prerequisites
 
-If you can see this skill, either the bootstrap script already ran or someone manually installed the skills. The bootstrap script (`scripts/bootstrap.sh` or `scripts/bootstrap.ps1`) handles cloning the repo, creating the `~/.claude/workflow/` symlink, and installing skills. If those steps are already done, this wizard picks up from board/project configuration.
+If you can see this skill, either the bootstrap script already ran or someone manually installed the skills. The bootstrap script (`scripts/bootstrap.sh` or `scripts/bootstrap.ps1`) handles cloning the repo, creating the `~/.claude/workflow/` symlink, and installing skills.
 
-If the bootstrap has NOT been run and someone is reading this skill manually, direct them to run:
+If the bootstrap has NOT been run:
 - **Linux/macOS:** `curl -sL https://raw.githubusercontent.com/rjweld21/gentic-workflow/master/scripts/bootstrap.sh | bash`
 - **Windows:** `irm https://raw.githubusercontent.com/rjweld21/gentic-workflow/master/scripts/bootstrap.ps1 | iex`
+
+## Context Layers
+
+Before starting, understand the three layers (see `docs/context-layers.md` for full details):
+
+| Layer | Location | Shared? | Purpose |
+|---|---|---|---|
+| Organization | `context/org/` | All teams in org | Board platform, org conventions |
+| Project | `context/project/<name>/` | Team members | Test commands, architecture, learnings |
+| User | `context/user/` | Never (private) | Preferences, credentials, local paths |
 
 ## Setup Flow
 
 Walk the user through each step below. Check what's already done and skip completed steps.
 
-### Step 1: Locate the Gentic Workflow Installation
+### Step 1: Verify Installation
 
-Check if the workflow is already installed (bootstrap should have done this):
+Check if the workflow is installed (bootstrap should have done this):
 
 1. Check for `~/.claude/workflow/` (symlink or directory)
-2. If not found, ask the user where they cloned the gentic-workflow repo
-3. If not cloned yet, help them clone it:
-   ```bash
-   git clone <repo-url> <preferred-path>
-   ```
-4. Create symlink/junction from `~/.claude/workflow/` to the repo:
-   - **Linux/macOS:** `ln -s <repo-path> ~/.claude/workflow`
-   - **Windows:** `mklink /J "%USERPROFILE%\.claude\workflow" "<repo-path>"`
-5. Verify the symlink works by reading `~/.claude/workflow/README.md`
+2. Verify `~/.claude/workflow/README.md` is readable
+3. Check skills are linked:
+   - `~/.claude/skills/initialize-workflow/SKILL.md` exists
+   - `~/.claude/skills/using-workflow/SKILL.md` exists
+4. If anything is missing, guide the user through the bootstrap or manual setup
 
-### Step 2: Choose and Configure Board Adapter
+### Step 2: Organization Context (`context/org/`)
 
-1. Check if `~/.claude/workflow/config/board-config.json` exists
-2. If not, ask the user which adapter they want to use:
-   - List available adapters from `~/.claude/workflow/adapters/`
-3. Read the adapter's `README.md` for prerequisites
-4. Walk through adapter setup:
-   - For **GitHub Projects**: verify `gh` CLI is installed and authenticated, check project scopes, help create fields if needed
-5. Help the user get field IDs and populate `board-config.json`:
-   ```bash
-   cp ~/.claude/workflow/config/board-config.example.json ~/.claude/workflow/config/board-config.json
-   ```
-6. Guide them through filling in the IDs from the adapter's README instructions
+1. Check if `~/.claude/workflow/context/org/org-config.json` exists
+2. If not, ask the user:
+   - "Are you setting this up for personal use or within an organization?"
+   - **Personal use:** Create a minimal org-config with just the board adapter settings
+   - **Organization:** Create a full org-config with conventions and defaults
+3. Walk through `org-config.json`:
+   - `adapter` — which board platform? List available adapters from `adapters/`
+   - `board` settings — read the adapter's `README.md` and guide field creation + ID extraction
+   - `defaults` — methodology (default: tdd), commit convention, branch pattern, coverage threshold
+4. If this is a **fork for an org**, ask:
+   - "Do you want to commit org context to this repo so all team members inherit it?"
+   - If yes: explain they should remove the `context/org/` line from `.gitignore`
+   - If no: keep it gitignored (each user sets up their own)
+5. Optionally create `context/org/conventions.md` with initial org standards
 
-### Step 3: Configure Project Repo(s)
+### Step 3: Project Context (`context/project/<name>/`)
 
-For each project repo the user wants to add to the workflow:
+For each project the user wants to add:
 
-1. Navigate to the project root
-2. Create the workflow directory structure:
-   ```bash
-   mkdir -p .workflow/agent-notes/active .workflow/agent-notes/completed .workflow/evidence
-   ```
-3. Copy and fill in project config:
-   ```bash
-   cp ~/.claude/workflow/config/project-config.example.json .workflow/project-config.json
-   ```
-4. Walk through each field in `project-config.json`:
+1. Ask for the project name (will become the directory name)
+2. Create `~/.claude/workflow/context/project/<name>/`
+3. Copy template: `cp context/project/project-config.example.json context/project/<name>/project-config.json`
+4. Walk through `project-config.json`:
    - `repo` — the owner/repo-name on the platform
-   - `default_branch` — usually `main`
-   - `board_project_option_id` — the ID for this project on the board
-   - `project_instructions_file` — detect which one exists (CLAUDE.md, .cursorrules, etc.)
-   - `test_commands` — ask what commands run tests for each area
-   - `coverage_thresholds` — ask or use defaults (80%)
-   - `coding_standards` — detect from existing config files (package.json, pyproject.toml, etc.)
-   - `skills` — ask if they use Superpowers, OpenSpec, or other frameworks
-5. Ensure `.workflow/` is in `.gitignore`:
+   - `project_path` — local path to the project repo on this machine
+   - `default_branch` — usually `main` (or leave empty to inherit org default)
+   - `board_project_option_id` — the ID for this project on the board's Project field
+   - `project_instructions_file` — auto-detect (check for CLAUDE.md, .cursorrules, CONTRIBUTING.md in the project)
+   - `notes_directory` — default `.workflow` (creates agent notes in the project repo)
+   - `spec_directory` / `plan_directory` — defaults to `docs/specs` and `docs/plans`
+   - `test_commands` — ask what commands run tests (or detect from package.json, pyproject.toml, Makefile)
+   - `coverage_thresholds` — ask or inherit org default
+   - `coding_standards` — detect from project config files
+   - `skills` — ask if they use Superpowers, OpenSpec, or other frameworks per phase
+5. Set up the project repo's working directory:
    ```bash
+   cd <project-path>
+   mkdir -p .workflow/agent-notes/active .workflow/agent-notes/completed .workflow/evidence
    grep -q "^\.workflow/" .gitignore 2>/dev/null || echo ".workflow/" >> .gitignore
    ```
+6. Create empty `learnings.md` for the project:
+   ```bash
+   cp ~/.claude/workflow/context/project/learnings.example.md ~/.claude/workflow/context/project/<name>/learnings.md
+   ```
+7. If this is a **fork for a team**, ask:
+   - "Do you want to commit project context so all team members inherit it?"
+   - If yes: explain they should remove the `context/project/` line from `.gitignore`
+   - `project_path` will vary per machine — note that team members should override this in their user context
 
-### Step 4: Install Skills
+### Step 4: User Context (`context/user/`)
 
-1. Create `~/.claude/skills/` if it doesn't exist
-2. Symlink the workflow skills:
-   - **Linux/macOS:**
-     ```bash
-     ln -s ~/.claude/workflow/skills/initialize-workflow ~/.claude/skills/initialize-workflow
-     ln -s ~/.claude/workflow/skills/using-workflow ~/.claude/skills/using-workflow
-     ```
-   - **Windows:**
-     ```bash
-     mklink /J "%USERPROFILE%\.claude\skills\initialize-workflow" "%USERPROFILE%\.claude\workflow\skills\initialize-workflow"
-     mklink /J "%USERPROFILE%\.claude\skills\using-workflow" "%USERPROFILE%\.claude\workflow\skills\using-workflow"
-     ```
+1. Check if `~/.claude/workflow/context/user/preferences.json` exists
+2. If not, create from template:
+   ```bash
+   cp context/user/preferences.example.json context/user/preferences.json
+   ```
+3. Walk through preferences:
+   - `display_name` — how the agent should refer to this user
+   - `reporting.style` — concise, detailed, or narrative
+   - `reporting.format` — bullet-points, prose, or tables
+   - `development.auto_commit` / `auto_push` — should agents commit and push automatically?
+   - `project_paths` — local paths to each project repo on this machine
+   - `environment` — OS, shell, python command, node version, etc. (auto-detect where possible)
+4. Create `context/user/local.md` from template
+5. If the user has credentials (API keys, tokens):
+   - Create `context/user/credentials.json` with relevant keys
+   - Remind: "This file is always gitignored and never leaves your machine"
 
-### Step 5: Verify Setup
+**User context is ALWAYS gitignored.** Never prompt about committing it.
 
-Run a quick health check:
+### Step 5: Install Skills (if not already done)
 
-1. Read `~/.claude/workflow/config/board-config.json` — verify adapter and field IDs are set
-2. For each configured project, read `<project>/.workflow/project-config.json` — verify required fields
-3. Test board connectivity using the adapter's `list_items` command
-4. Report what's configured and what's still needed
+1. Check if `~/.claude/skills/initialize-workflow` and `~/.claude/skills/using-workflow` exist
+2. If not, create symlinks/junctions (bootstrap should have done this)
 
-### Step 6: Hand Off to Using-Workflow
+### Step 6: Verify Setup
 
-After setup is complete, invoke the `using-workflow` skill to initialize the session context.
+Run a health check across all three layers:
+
+1. **Org layer:** org-config.json exists, adapter is set, board IDs populated
+2. **Project layer:** at least one project configured, project-config.json has required fields
+3. **User layer:** preferences.json exists, project_paths match configured projects
+4. **Board connectivity:** use adapter's `list_items` command to verify access
+5. Report what's configured and what's still needed
+
+### Step 7: Hand Off to Using-Workflow
+
+After setup is complete, invoke the `using-workflow` skill to initialize the session context with the newly configured layers.
 
 ## What Gets Created
 
-| Location | Purpose |
-|---|---|
-| `~/.claude/workflow/` | Symlink to gentic-workflow repo |
-| `~/.claude/workflow/config/board-config.json` | Board adapter config with field IDs |
-| `<project>/.workflow/project-config.json` | Per-project config |
-| `<project>/.workflow/agent-notes/` | Agent working notes directory |
-| `<project>/.workflow/evidence/` | Test evidence directory |
-| `~/.claude/skills/initialize-workflow/` | Symlink to this skill |
-| `~/.claude/skills/using-workflow/` | Symlink to using-workflow skill |
+| Location | Layer | Purpose |
+|---|---|---|
+| `context/org/org-config.json` | Org | Board platform, adapter config, org defaults |
+| `context/org/conventions.md` | Org | Org-wide standards (optional) |
+| `context/project/<name>/project-config.json` | Project | Repo, tests, standards, skills |
+| `context/project/<name>/learnings.md` | Project | Team knowledge (grows over time) |
+| `context/user/preferences.json` | User | Personal workflow preferences |
+| `context/user/credentials.json` | User | API keys and tokens (never committed) |
+| `context/user/local.md` | User | Machine-specific notes |
+| `<project>/.workflow/` | Runtime | Agent notes, evidence (in project repo, gitignored) |
 
 ## Troubleshooting
 
-- **Symlink/junction fails on Windows**: must run terminal as Administrator, or use directory junctions (`mklink /J`) which don't require elevation
-- **gh CLI not authenticated**: run `gh auth login` then `gh auth refresh -s read:project -s project`
-- **Board field IDs not found**: use the adapter's README step-by-step to create fields first, then query IDs
-- **Project config validation fails**: ensure all required fields are filled in, not left as empty strings
+- **Symlink/junction fails on Windows:** use directory junctions (`mklink /J`) which don't require elevation
+- **gh CLI not authenticated:** run `gh auth login` then `gh auth refresh -s read:project -s project`
+- **Board field IDs not found:** use the adapter's README step-by-step to create fields first, then query IDs
+- **Project config validation fails:** ensure required fields are filled in, not left as empty strings
+- **Can't find project by name:** check that the directory name under `context/project/` matches what you expect, and that `project_paths` in user preferences points to the right local path

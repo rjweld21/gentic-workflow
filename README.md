@@ -158,24 +158,34 @@ gentic-workflow/
 ├── README.md                          ← This file
 ├── LICENSE                            ← MIT License
 ├── .gitignore
-├── agents/
+├── agents/                            ← Core agent specifications (read-only)
 │   ├── board-orchestrator.md          ← Polls and dispatches
 │   ├── refine-agent.md                ← Spec + plan
 │   ├── implement-agent.md             ← TDD implementation
 │   ├── test-agent.md                  ← AC validation
 │   └── review-agent.md               ← Code review + PR/MR
-├── protocols/
+├── protocols/                         ← Core protocols (read-only)
 │   ├── notes-protocol.md              ← How agents log work
 │   ├── comment-protocol.md            ← How agents communicate on stories
-│   └── handoff-protocol.md            ← Status transitions, circular flow, recovery
-├── adapters/
+│   ├── handoff-protocol.md            ← Status transitions, circular flow, recovery
+│   └── context-recording.md           ← How agents classify and record new learnings
+├── adapters/                          ← Board platform adapters (read-only)
 │   └── github-projects/
 │       ├── README.md                  ← Setup instructions
 │       └── commands.md                ← Operation → gh CLI command mappings
-├── config/
-│   ├── board-config.example.json      ← Template for your board's field IDs
-│   ├── project-config.example.json    ← Template for per-repo config
-│   └── orchestrator-state.example.json ← Template for orchestrator runtime state
+├── context/                           ← Three-layer context (grows over time)
+│   ├── org/                           ← Organization level (gitignored in base repo)
+│   │   ├── org-config.example.json    ← Template
+│   │   └── conventions.example.md     ← Template
+│   ├── project/                       ← Project/team level (gitignored in base repo)
+│   │   ├── project-config.example.json ← Template
+│   │   ├── learnings.example.md       ← Template
+│   │   └── <project-name>/            ← One dir per project
+│   └── user/                          ← User/machine level (ALWAYS gitignored)
+│       ├── preferences.example.json   ← Template
+│       └── local.example.md           ← Template
+├── config/                            ← Legacy config templates
+│   └── orchestrator-state.example.json
 ├── skills/
 │   ├── initialize-workflow/
 │   │   └── SKILL.md                   ← Setup wizard for first-time configuration
@@ -187,11 +197,15 @@ gentic-workflow/
 └── docs/
     ├── adapter-interface.md           ← Abstract operations all adapters must implement
     ├── agent-runtime.md               ← Runtime requirements + Claude Code reference
+    ├── context-layers.md              ← Three-layer context system explained
     ├── skill-integration.md           ← How to plug in Superpowers, OpenSpec, etc.
     └── circular-flow.md               ← How push-backs work between agents
 ```
 
 ## Key Concepts
+
+### Context Layers
+The framework ships as a read-only base. All learned knowledge goes into three context layers that grow over time — organization (shared across teams), project (shared across team members), and user (private to one machine). Agents automatically classify and record new learnings to the appropriate layer. See [`docs/context-layers.md`](docs/context-layers.md).
 
 ### Circular Flow
 Agents don't just move forward. Any agent can push a story back to a previous state with clear comments about what needs fixing. The receiving agent addresses only the flagged issues, not all work. See [`docs/circular-flow.md`](docs/circular-flow.md).

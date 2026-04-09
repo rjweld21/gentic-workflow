@@ -1,0 +1,57 @@
+{
+  "_comment": "Organization-level configuration. Copy to org-config.json and fill in values. See docs/context-layers.md for what belongs at this level.",
+
+  "org_name": "",
+  "adapter": "github-projects",
+
+  "_board_comment": "Board platform settings. These are the same fields from board-config.example.json — they live at the org level because the board is shared across teams.",
+  "board": {
+    "owner": "",
+    "project_number": 1,
+    "project_id": "",
+    "issue_repo": "",
+    "issue_repo_id": "",
+    "fields": {
+      "status": {
+        "id": "",
+        "options": {
+          "backlog": "",
+          "refinement": "",
+          "ready": "",
+          "in_progress": "",
+          "testing": "",
+          "in_review": "",
+          "done": ""
+        }
+      },
+      "agent_status": {
+        "id": "",
+        "options": {
+          "idle": "",
+          "agent_working": "",
+          "blocked": ""
+        }
+      },
+      "priority": {
+        "id": "",
+        "options": {
+          "p0": "",
+          "p1": "",
+          "p2": ""
+        }
+      },
+      "size": { "id": "" },
+      "epic": { "id": "" },
+      "project": { "id": "" }
+    }
+  },
+
+  "_conventions_comment": "Org-wide defaults. Projects can override these in their project-config.json.",
+  "defaults": {
+    "methodology": "tdd",
+    "commit_convention": "conventional",
+    "default_branch": "main",
+    "branch_prefix_pattern": "feat/<story-name>",
+    "coverage_threshold": 80
+  }
+}

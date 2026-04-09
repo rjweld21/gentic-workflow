@@ -73,6 +73,10 @@ Follow the notes protocol in `protocols/notes-protocol.md`:
 - [ ] AC items are testable (not vague)
 - [ ] No TODO or TBD left in spec or plan
 
+## Context Recording
+
+During refinement, you may learn things about the project or org that would help future sessions. Follow `protocols/context-recording.md` — classify learnings by layer (org/project/user) and append to the appropriate context file. Common refinement-phase learnings: architectural patterns, dependency relationships, team conventions for specs.
+
 ## On Failure
 
 If you cannot complete refinement (e.g., scope is unclear, dependencies are missing):

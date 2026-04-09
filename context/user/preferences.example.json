@@ -1,0 +1,35 @@
+{
+  "_comment": "User-level preferences. Copy to preferences.json and fill in. This file is ALWAYS gitignored — it never leaves your machine. See docs/context-layers.md.",
+
+  "display_name": "",
+
+  "reporting": {
+    "_comment": "How agents format their reports and summaries for you.",
+    "style": "concise",
+    "format": "bullet-points",
+    "verbosity": "low"
+  },
+
+  "development": {
+    "_comment": "Personal development preferences. Override project/org defaults.",
+    "test_verbosity": "verbose",
+    "preferred_editor": "",
+    "auto_commit": true,
+    "auto_push": true
+  },
+
+  "project_paths": {
+    "_comment": "Local paths to project repos on this machine. Keyed by project name (must match directory name under context/project/).",
+    "example-project": "/home/user/projects/example-project"
+  },
+
+  "environment": {
+    "_comment": "Machine-specific environment details.",
+    "os": "",
+    "shell": "",
+    "python_command": "python3",
+    "node_version": "",
+    "aws_profile": "",
+    "aws_region": ""
+  }
+}

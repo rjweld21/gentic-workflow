@@ -100,6 +100,10 @@ If this story was pushed back from Testing or Review:
 5. Add comment: "Addressed feedback: [summary of changes]"
 6. Re-transition to Testing (or In Review if it came from review and the fix is trivial)
 
+## Context Recording
+
+During implementation, you may discover project-specific gotchas (environment requirements, build quirks, undocumented dependencies). Follow `protocols/context-recording.md` — record these at the project level so future implement agents don't hit the same issues.
+
 ## Pushing Back to Refinement
 
 If you find the spec or plan has significant gaps that block implementation:

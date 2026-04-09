@@ -7,7 +7,7 @@ description: Use when starting a session that will use the Gentic Workflow for o
 
 ## Overview
 
-Session initializer for the Gentic Workflow. Loads board config, project config, and adapter commands into the agent's context so it can orchestrate or participate in the workflow. Run at the start of any session that will interact with the board.
+Session initializer for the Gentic Workflow. Loads the three context layers (org, project, user), adapter commands, and protocols into the agent's context. Run at the start of any session that will interact with the board.
 
 ## When to Use
 
@@ -22,36 +22,56 @@ Session initializer for the Gentic Workflow. Loads board config, project config,
 
 ## Session Initialization
 
-### Step 1: Locate and Validate Config
+### Step 1: Load Context Layers (Cascading)
 
-1. Read `~/.claude/workflow/config/board-config.json`
-   - If not found: tell the user to run `initialize-workflow` first, then stop
-   - Extract: `adapter`, field IDs, project/board identifiers
-2. Identify the adapter: read `adapter` field from board config
-3. Load adapter commands from `~/.claude/workflow/adapters/<adapter>/commands.md`
+Load context from all three layers. More specific layers override general ones. Read each layer's docs at `docs/context-layers.md` for full details.
 
-### Step 2: Detect Current Project
+**Layer 1 — Organization:**
+1. Read `~/.claude/workflow/context/org/org-config.json`
+   - If not found: the workflow may not be fully set up. Warn the user but continue — org context is optional for individual use.
+   - Extract: adapter type, board IDs, org defaults (methodology, branch pattern, coverage)
+2. Read `~/.claude/workflow/context/org/conventions.md` if it exists
+   - These are org-wide standards to follow during this session
 
-1. Check if the current working directory has `.workflow/project-config.json`
-2. If found, read it and extract:
-   - `repo`, `default_branch`, `notes_directory`
-   - `test_commands`, `coverage_thresholds`, `coding_standards`
-   - `skills` configuration for each phase
-   - `project_instructions_file` — read it if it exists
-   - `spec_directory`, `plan_directory`, `branch_prefix_pattern`, `methodology`
-3. If not found, note that this session is board-level only (orchestrator mode, not project-specific)
+**Layer 2 — Project:**
+1. Determine the current project:
+   - Check if the current working directory has `.workflow/project-config.json` (legacy location)
+   - Check `~/.claude/workflow/context/project/` for a directory matching the current repo name
+   - Check user preferences for `project_paths` mapping
+2. If found, read the project's `project-config.json`
+   - Values here override org defaults where set (non-empty values win)
+3. Read `learnings.md` and `architecture.md` if they exist
+   - These are accumulated team knowledge — factor them into your work
 
-### Step 3: Load Workflow Context
+**Layer 3 — User:**
+1. Read `~/.claude/workflow/context/user/preferences.json` if it exists
+   - Respect personal preferences for reporting style, verbosity, auto-commit, etc.
+2. Read `~/.claude/workflow/context/user/local.md` if it exists
+   - Machine-specific notes (tool versions, environment quirks)
+3. Read `~/.claude/workflow/context/user/credentials.json` if it exists
+   - NEVER log or echo credential values
 
-Read and internalize these documents — they define how you operate:
+### Step 2: Resolve Merged Config
+
+Build a merged configuration by cascading: org defaults → project overrides → user overrides.
+
+For example:
+- `methodology`: org says `tdd`, project says nothing → use `tdd`
+- `coverage_thresholds.backend`: org default is `80`, project says `90` → use `90`
+- `test_verbosity`: user says `verbose` → use `verbose` regardless of other layers
+
+### Step 3: Load Workflow Framework
+
+Read and internalize these core documents:
 
 | Document | Path | Contains |
 |---|---|---|
-| Adapter commands | `~/.claude/workflow/adapters/<adapter>/commands.md` | Concrete CLI commands for board operations |
-| Handoff protocol | `~/.claude/workflow/protocols/handoff-protocol.md` | Status transitions, liveness, recovery |
-| Comment protocol | `~/.claude/workflow/protocols/comment-protocol.md` | How to communicate on stories |
-| Notes protocol | `~/.claude/workflow/protocols/notes-protocol.md` | How to log work for continuity |
-| Circular flow | `~/.claude/workflow/docs/circular-flow.md` | Push-back mechanics |
+| Adapter commands | `adapters/<adapter>/commands.md` | Concrete CLI commands for board operations |
+| Handoff protocol | `protocols/handoff-protocol.md` | Status transitions, liveness, recovery |
+| Comment protocol | `protocols/comment-protocol.md` | How to communicate on stories |
+| Notes protocol | `protocols/notes-protocol.md` | How to log work for continuity |
+| Circular flow | `docs/circular-flow.md` | Push-back mechanics |
+| Context layers | `docs/context-layers.md` | How to classify and record new learnings |
 
 ### Step 4: Query Board State
 
@@ -91,12 +111,34 @@ Confirm to the user or orchestrator what's loaded:
 
 ```
 Gentic Workflow initialized:
-  Adapter:     <adapter-name>
-  Project:     <repo> (or "board-level only")
-  Role:        <determined role>
-  Board state: <summary from step 4>
-  Ready to:    <what you can do next>
+  Adapter:       <adapter-name>
+  Organization:  <org-name or "not configured">
+  Project:       <project-name or "board-level only">
+  User:          <display-name or "anonymous">
+  Role:          <determined role>
+  Board state:   <summary from step 4>
+  Ready to:      <what you can do next>
 ```
+
+## Context Recording During Sessions
+
+Throughout the session, watch for new learnings. When you discover something that would help future sessions, classify and record it:
+
+| If the learning applies to... | Write to... |
+|---|---|
+| All teams and projects in the org | `context/org/conventions.md` |
+| This specific project/team | `context/project/<name>/learnings.md` |
+| This user's preferences or machine | `context/user/local.md` |
+
+**Format for appended entries:**
+```markdown
+### YYYY-MM-DD — <Brief title>
+<What was learned and why it matters for future sessions>
+```
+
+**Before recording:** read the existing file to avoid duplicating known information.
+
+**Credentials and secrets** always go to `context/user/credentials.json` — never to md files.
 
 ## Quick Reference — Common Operations
 
@@ -109,7 +151,8 @@ Gentic Workflow initialized:
 1. Read story context and previous notes
 2. Do the work for your stage (refine/implement/test/review)
 3. Write notes, comment on story, update board status
-4. Exit when done
+4. Record any learnings to appropriate context layer
+5. Exit when done
 
 ### Interactive Commands
 - "Show me the board" → query and display board state
@@ -119,9 +162,11 @@ Gentic Workflow initialized:
 
 ## Important Rules
 
-1. **Always use adapter commands** from `commands.md` — never hardcode platform-specific CLI commands
-2. **Always write notes** — every meaningful action gets logged per the notes protocol
-3. **Always comment on stories** — transitions and blockers must be visible on the board
-4. **Conventional commits** — `feat:`, `fix:`, `test:`, `refactor:`
-5. **Error budget** — 1 retry per story, then block for human
-6. **Don't skip to Done** — stories must pass through every stage in order
+1. **Never edit base framework files** — agents, protocols, adapters, and docs are read-only
+2. **Always use adapter commands** from `commands.md` — never hardcode platform-specific CLI commands
+3. **Always write notes** — every meaningful action gets logged per the notes protocol
+4. **Always comment on stories** — transitions and blockers must be visible on the board
+5. **Conventional commits** — `feat:`, `fix:`, `test:`, `refactor:`
+6. **Error budget** — 1 retry per story, then block for human
+7. **Don't skip to Done** — stories must pass through every stage in order
+8. **Record learnings** — when you discover something new, classify it and write it to the right context layer

@@ -1,0 +1,60 @@
+{
+  "_comment": "Project-level configuration. Create a directory per project under context/project/<project-name>/ and copy this file there. See docs/context-layers.md for what belongs at this level.",
+  "_instructions": {
+    "repo": "Repository in owner/name format.",
+    "default_branch": "Branch that PRs/MRs target. Overrides org default if set.",
+    "board_project_option_id": "The option ID for this project on the board's Project field.",
+    "project_instructions_file": "File in the project repo root with agent instructions (CLAUDE.md, .cursorrules, etc.).",
+    "project_path": "Absolute path to the project repo on the machine. Can be overridden at user level.",
+    "notes_directory": "Directory inside the project repo for agent notes and evidence. Must be gitignored in the project repo.",
+    "spec_directory": "Where design specs are stored relative to project root.",
+    "plan_directory": "Where implementation plans are stored relative to project root.",
+    "branch_prefix_pattern": "Overrides org default if set.",
+    "methodology": "Overrides org default if set.",
+    "test_commands": "Commands to run tests per area.",
+    "coverage_thresholds": "Minimum coverage per area. Overrides org default.",
+    "coding_standards": "Project-specific standards.",
+    "skills": "Optional skill frameworks for each phase."
+  },
+
+  "repo": "",
+  "default_branch": "",
+  "board_project_option_id": "",
+
+  "project_instructions_file": "CLAUDE.md",
+  "project_path": "",
+  "notes_directory": ".workflow",
+  "spec_directory": "docs/specs",
+  "plan_directory": "docs/plans",
+  "branch_prefix_pattern": "",
+  "methodology": "",
+
+  "test_commands": {
+    "backend": "",
+    "frontend": "",
+    "infrastructure": "",
+    "e2e": ""
+  },
+
+  "coverage_thresholds": {
+    "backend": 0,
+    "frontend": 0,
+    "infrastructure": 0
+  },
+
+  "coding_standards": {
+    "backend_language": "",
+    "frontend_framework": "",
+    "linter": "",
+    "formatter": "",
+    "type_checker": "",
+    "reference": ""
+  },
+
+  "skills": {
+    "refinement": [],
+    "implementation": [],
+    "testing": [],
+    "review": []
+  }
+}

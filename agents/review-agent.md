@@ -134,6 +134,10 @@ Follow the notes protocol in `protocols/notes-protocol.md`:
 - Log every file reviewed and findings
 - Log spec alignment checks
 
+## Context Recording
+
+During review, you may identify patterns worth recording — code quality standards the team follows, common review findings that could be prevented, or CI/CD behavior. Follow `protocols/context-recording.md` — these are typically project or org-level learnings.
+
 ## Pushing Back to In Progress
 
 When issues are found that require code changes:
